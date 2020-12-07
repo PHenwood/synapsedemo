@@ -1,0 +1,16 @@
+{
+	"name": "04 Synapse Link",
+	"properties": {
+		"content": {
+			"query": "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'CovidOnDemand')\n    BEGIN\n        CREATE DATABASE [CovidOnDemand]\n    END\nGO\n\nUSE [CovidOnDemand]\nGO\n\nDROP VIEW IF EXISTS \n    dbo.CovidDataCosmosDB;\nGO\n\n-- Create view\nCREATE VIEW CovidDataCosmosDB\nAS \nSELECT\n    dateRep, cases, deaths\nFROM OPENROWSET\n    (\n        BULK N'endpoint=https://covidanalysis.documents.azure.com:443/;account=covidanalysis;database=coviddata;collection=coviddata;region=westeurope',   SECRET = 'sFBgQDFOI5blWA6p4yTN4t6c9vOkYzupb2PTRs63MadqzqwjYdUwuGyeOlvfEWuF4bW1OzTPytu4CSNiQhR1dg==',\n    FORMAT='CosmosDB'  \n    )\nWITH (\n    dateRep varchar(50),\n    cases varchar(50),\n    deaths varchar(50)\n) AS q1\nGO\n\nSELECT * FROM CovidDataCosmosDB\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "SQLOnDemand",
+				"type": "SqlOnDemand"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

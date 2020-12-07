@@ -1,0 +1,78 @@
+{
+	"name": "03 Conform",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "ondemandspark",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/d661a889-c8b8-41f2-93ab-99b3ed99b6e7/resourceGroups/CovidDemo/providers/Microsoft.Synapse/workspaces/covidanalysis/bigDataPools/ondemandspark",
+				"name": "ondemandspark",
+				"type": "Spark",
+				"endpoint": "https://covidanalysis.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/ondemandspark",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 8,
+				"memory": 56
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"#variables\n",
+					"adlspath = 'abfss://covidanalysisfilesystem@covidanalysisstorage.dfs.core.windows.net/covid/spark/'\n",
+					"transformfolderpath = adlspath + 'silver'\n",
+					"conformedfolderpath = adlspath + 'gold'\n",
+					"\n",
+					"#reading the raw parquet file\n",
+					"raw_data = spark.read.load(transformfolderpath, format='parquet')\n",
+					"\n",
+					"raw_data.show(5)"
+				],
+				"attachments": null,
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"#extracting covid fact data\n",
+					"fact_covidimpact = raw_data[['dateRep','Year','Month','Day','geoId','cases','deaths']]\n",
+					"fact_covidimpact.write.partitionBy('Year','Month','Day').parquet(conformedfolderpath + '/fact/covidimpact', mode='overwrite')\n",
+					"\n",
+					"#extracting 2018 population data\n",
+					"fact_population = raw_data [['geoId','popData2019']].distinct()\n",
+					"fact_population.write.parquet(conformedfolderpath + '/fact/population', mode='overwrite')\n",
+					"\n",
+					"#extracting date dimension\n",
+					"dim_date = raw_data[['dateRep', 'day', 'month', 'year']].distinct()\n",
+					"dim_date.write.parquet(conformedfolderpath + '/dim/date', mode='overwrite')\n",
+					"\n",
+					"#extracting geo dimension\n",
+					"dim_geo = raw_data[['geoId','countriesAndTerritories','countryterritoryCode','continentExp']].distinct()\n",
+					"dim_geo.write.parquet(conformedfolderpath + '/dim/geo', mode='overwrite')\n",
+					"\n",
+					""
+				],
+				"execution_count": 5
+			}
+		]
+	}
+}

@@ -1,0 +1,21 @@
+{
+	"name": "ConformedFactCovid",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "covidanalysis-WorkspaceDefaultStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "covid/pipelines/gold/fact/covid",
+				"fileSystem": "covidanalysisfilesystem"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

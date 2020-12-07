@@ -1,0 +1,55 @@
+{
+	"name": "02 Transform",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "ondemandspark",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/d661a889-c8b8-41f2-93ab-99b3ed99b6e7/resourceGroups/CovidDemo/providers/Microsoft.Synapse/workspaces/covidanalysis/bigDataPools/ondemandspark",
+				"name": "ondemandspark",
+				"type": "Spark",
+				"endpoint": "https://covidanalysis.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/ondemandspark",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 8,
+				"memory": 56
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"#variables\n",
+					"adlspath = 'abfss://covidanalysisfilesystem@covidanalysisstorage.dfs.core.windows.net/covid/spark/'\n",
+					"rawfolderpath = adlspath + 'bronze'\n",
+					"transformfolderpath = adlspath + 'silver'\n",
+					"\n",
+					"raw_data = spark.read.load(rawfolderpath, format='csv', header=True)\n",
+					"\n",
+					"raw_data.write.partitionBy('Year','Month','Day').parquet(transformfolderpath,mode='overwrite')\n",
+					"\n",
+					"raw_data.head()"
+				],
+				"execution_count": 3
+			}
+		]
+	}
+}

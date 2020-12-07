@@ -1,0 +1,93 @@
+{
+	"name": "04 Synapse Link",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "ondemandspark",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/d661a889-c8b8-41f2-93ab-99b3ed99b6e7/resourceGroups/CovidDemo/providers/Microsoft.Synapse/workspaces/covidanalysis/bigDataPools/ondemandspark",
+				"name": "ondemandspark",
+				"type": "Spark",
+				"endpoint": "https://covidanalysis.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/ondemandspark",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 8,
+				"memory": 56
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"diagram": {
+						"activateDiagramType": 1,
+						"chartConfig": {
+							"category": "bar",
+							"keys": [
+								"_rid"
+							],
+							"values": [
+								"_ts"
+							],
+							"yLabel": "_ts",
+							"xLabel": "_rid",
+							"aggregation": "SUM",
+							"aggByBackend": false
+						},
+						"aggData": {
+							"_ts": {
+								"59JUAIIWZIl1AAAAAAAAAA==": 1591796044,
+								"59JUAIIWZIlDAAAAAAAAAA==": 1591796044,
+								"59JUAIIWZIlQAAAAAAAAAA==": 1591796044,
+								"59JUAIIWZIlVAAAAAAAAAA==": 1591796044,
+								"59JUAIIWZIlbAAAAAAAAAA==": 1591796044,
+								"59JUAIIWZIlgAAAAAAAAAA==": 1591796044,
+								"59JUAIIWZIlkAAAAAAAAAA==": 1591796044,
+								"59JUAIIWZIloAAAAAAAAAA==": 1591796044,
+								"59JUAIIWZIlsAAAAAAAAAA==": 1591796044,
+								"59JUAIIWZIlxAAAAAAAAAA==": 1591796044
+							}
+						},
+						"isSummary": false,
+						"previewData": {
+							"filter": null
+						},
+						"isSql": false
+					}
+				},
+				"source": [
+					"# Read from Cosmos DB analytical store into a Spark DataFrame and display 10 rows from the DataFrame\n",
+					"# To select a preferred list of regions in a multi-region Cosmos DB account, add .option(\"spark.cosmos.preferredRegions\", \"<Region1>,<Region2>\")\n",
+					"\n",
+					"df = spark.read\\\n",
+					"    .format(\"cosmos.olap\")\\\n",
+					"    .option(\"spark.synapse.linkedService\", \"CovidData\")\\\n",
+					"    .option(\"spark.cosmos.container\", \"coviddata\")\\\n",
+					"    .load()\n",
+					"\n",
+					"display(df.limit(10))"
+				],
+				"attachments": null,
+				"execution_count": 3
+			}
+		]
+	}
+}
