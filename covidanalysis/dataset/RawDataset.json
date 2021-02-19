@@ -2,7 +2,7 @@
 	"name": "RawDataset",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "covidanalysis-WorkspaceDefaultStorage",
+			"referenceName": "covid",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
@@ -10,7 +10,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "*",
 				"folderPath": "covid/pipelines/bronze",
 				"fileSystem": "covidanalysisfilesystem"
 			},
