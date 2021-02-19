@@ -21,6 +21,9 @@
 		},
 		"metadata": {
 			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
 			"kernelspec": {
 				"name": "synapse_pyspark",
 				"display_name": "Synapse PySpark"
@@ -81,8 +84,8 @@
 					"coviddataurl = 'abfss://covidanalysisfilesystem@covidanalysisstorage.dfs.core.windows.net/covid/Input/Covid.csv'\r\n",
 					"adlspath = 'abfss://covidanalysisfilesystem@covidanalysisstorage.dfs.core.windows.net/covid/'\r\n",
 					"rawfolderpathspark = adlspath + 'spark/bronze'\r\n",
-					"rawfolderpathsql = adlspath + 'sql/bronze'\r\n",
-					"rawfolderpathpipeline = adlspath + 'pipelines/bronze'\r\n",
+					"#rawfolderpathsql = adlspath + 'sql/bronze'\r\n",
+					"#rawfolderpathpipeline = adlspath + 'pipelines/bronze'\r\n",
 					"\r\n",
 					"#read data from source\r\n",
 					"#Casesdf = pd.read_csv(coviddataurl, encoding='ISO-8859-1')\r\n",
@@ -97,7 +100,7 @@
 					"\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 1
 			},
 			{
 				"cell_type": "markdown",
@@ -138,7 +141,7 @@
 					"\r\n",
 					"raw_data.head()"
 				],
-				"execution_count": null
+				"execution_count": 2
 			},
 			{
 				"cell_type": "markdown",
@@ -178,7 +181,7 @@
 					"\r\n",
 					"raw_data.show(5)"
 				],
-				"execution_count": 1
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -211,7 +214,7 @@
 					"dim_geo = raw_data[['geoId','countriesAndTerritories','countryterritoryCode','continentExp']].distinct()\r\n",
 					"dim_geo.write.parquet(conformedfolderpath + '/dim/geo', mode='overwrite')"
 				],
-				"execution_count": null
+				"execution_count": 4
 			}
 		]
 	}
