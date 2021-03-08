@@ -1,0 +1,11 @@
+{
+	"name": "PH Synapse",
+	"properties": {
+		"annotations": [],
+		"type": "PowerBIWorkspace",
+		"typeProperties": {
+			"workspaceID": "bbd13980-48f4-40e7-89ce-27f99d0b97e3",
+			"tenantID": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+		}
+	}
+}
