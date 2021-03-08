@@ -1,0 +1,206 @@
+{
+	"name": "00 End to End",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "PHSpark",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "56g",
+			"driverCores": 8,
+			"executorMemory": "56g",
+			"executorCores": 8,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/48717c50-337a-40bd-9a14-2570563138dd/resourceGroups/CustomerDemo/providers/Microsoft.Synapse/workspaces/phsynapse/bigDataPools/PHSpark",
+				"name": "PHSpark",
+				"type": "Spark",
+				"endpoint": "https://phsynapse.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/PHSpark",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 10,
+				"cores": 8,
+				"memory": 56,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Import Data"
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd\r\n",
+					"\r\n",
+					"#variables\r\n",
+					"coviddataurl = \"https://opendata.ecdc.europa.eu/covid19/casedistribution/csv\"\r\n",
+					"adlspath = 'abfss://phsynapsefs@phsynapsedls.dfs.core.windows.net/Covid/'\r\n",
+					"rawfolderpathspark = adlspath + 'spark/bronze'\r\n",
+					"rawfolderpathsql = adlspath + 'sql/bronze'\r\n",
+					"rawfolderpathpipeline = adlspath + 'pipelines/bronze'\r\n",
+					"\r\n",
+					"#read data from source\r\n",
+					"Casesdf = pd.read_csv(coviddataurl, encoding='ISO-8859-1')\r\n",
+					"\r\n",
+					"raw_data = spark.createDataFrame(Casesdf.astype(str))\r\n",
+					"\r\n",
+					"raw_data.write.partitionBy('Year','Month','Day').csv(rawfolderpathspark, mode='overwrite', header = 'true')\r\n",
+					"raw_data.write.csv(rawfolderpathsql, mode='overwrite', header = 'true')\r\n",
+					"raw_data.write.csv(rawfolderpathpipeline, mode='overwrite', header = 'true')\r\n",
+					"\r\n",
+					"raw_data.head()"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Transform Data"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"#variables\r\n",
+					"adlspath = 'abfss://phsynapsefs@phsynapsedls.dfs.core.windows.net/Covid/spark/'\r\n",
+					"rawfolderpath = adlspath + 'bronze'\r\n",
+					"transformfolderpath = adlspath + 'silver'\r\n",
+					"\r\n",
+					"raw_data = spark.read.load(rawfolderpath, format='csv', header=True)\r\n",
+					"\r\n",
+					"raw_data.write.partitionBy('Year','Month','Day').parquet(transformfolderpath,mode='overwrite')\r\n",
+					"\r\n",
+					"raw_data.head()"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Conform"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"#variables\r\n",
+					"adlspath = 'abfss://phsynapsefs@phsynapsedls.dfs.core.windows.net/Covid/spark/'\r\n",
+					"transformfolderpath = adlspath + 'silver'\r\n",
+					"conformedfolderpath = adlspath + 'gold'\r\n",
+					"\r\n",
+					"#reading the raw parquet file\r\n",
+					"raw_data = spark.read.load(transformfolderpath, format='parquet')\r\n",
+					"\r\n",
+					"raw_data.show(5)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"#extracting covid fact data\r\n",
+					"fact_covidimpact = raw_data[['dateRep','Year','Month','Day','geoId','cases','deaths']]\r\n",
+					"fact_covidimpact.write.partitionBy('Year','Month','Day').parquet(conformedfolderpath + '/fact/covidimpact', mode='overwrite')\r\n",
+					"\r\n",
+					"#extracting 2018 population data\r\n",
+					"fact_population = raw_data [['geoId','popData2019']].distinct()\r\n",
+					"fact_population.write.parquet(conformedfolderpath + '/fact/population', mode='overwrite')\r\n",
+					"\r\n",
+					"#extracting date dimension\r\n",
+					"dim_date = raw_data[['dateRep', 'day', 'month', 'year']].distinct()\r\n",
+					"dim_date.write.parquet(conformedfolderpath + '/dim/date', mode='overwrite')\r\n",
+					"\r\n",
+					"#extracting geo dimension\r\n",
+					"dim_geo = raw_data[['geoId','countriesAndTerritories','countryterritoryCode','continentExp']].distinct()\r\n",
+					"dim_geo.write.parquet(conformedfolderpath + '/dim/geo', mode='overwrite')"
+				],
+				"execution_count": null
+			}
+		]
+	}
+}
