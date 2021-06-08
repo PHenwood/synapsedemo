@@ -1,6 +1,7 @@
 {
-	"name": "CopyPipeline_304",
+	"name": "RawToStaging",
 	"properties": {
+		"description": "Convert files from CSV to Parquet",
 		"activities": [
 			{
 				"name": "Copy_304",
