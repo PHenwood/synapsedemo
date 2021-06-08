@@ -1,0 +1,16 @@
+{
+	"name": "00 On Demand Query",
+	"properties": {
+		"content": {
+			"query": "-- Demo\nSELECT *\nFROM OPENROWSET(\n        BULK 'https://covidanalysisstorage.blob.core.windows.net/covidanalysisfilesystem/covid/sql/bronze/*.csv',\n        FORMAT = 'CSV'\n    )\nWITH (\n        [dateRep] varchar (10),\n        [day] int,\n        [month] int,\n        [year] int,\n        [cases] int,\n        [deaths] int,\n        countriesAndTerritories varchar (100),\n        geoId varchar (100),\n        countryterritoryCode varchar (100),\n        popData2018 varchar(20),\n        continentExp varchar (100)\n) AS [r]\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"poolName": "Built-in",
+				"databaseName": "master"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

@@ -1,0 +1,83 @@
+{
+	"name": "03 Conform",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"#variables\r\n",
+					"adlspath = 'abfss://phsynapsefs@phsynapsedls.dfs.core.windows.net/Covid/spark/'\r\n",
+					"transformfolderpath = adlspath + 'silver'\r\n",
+					"conformedfolderpath = adlspath + 'gold'\r\n",
+					"\r\n",
+					"#reading the raw parquet file\r\n",
+					"raw_data = spark.read.load(transformfolderpath, format='parquet')\r\n",
+					"\r\n",
+					"raw_data.show(5)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"#extracting covid fact data\r\n",
+					"fact_covidimpact = raw_data[['dateRep','Year','Month','Day','geoId','cases','deaths']]\r\n",
+					"fact_covidimpact.write.partitionBy('Year','Month','Day').parquet(conformedfolderpath + '/fact/covidimpact', mode='overwrite')\r\n",
+					"\r\n",
+					"#extracting 2018 population data\r\n",
+					"fact_population = raw_data [['geoId','popData2019']].distinct()\r\n",
+					"fact_population.write.parquet(conformedfolderpath + '/fact/population', mode='overwrite')\r\n",
+					"\r\n",
+					"#extracting date dimension\r\n",
+					"dim_date = raw_data[['dateRep', 'day', 'month', 'year']].distinct()\r\n",
+					"dim_date.write.parquet(conformedfolderpath + '/dim/date', mode='overwrite')\r\n",
+					"\r\n",
+					"#extracting geo dimension\r\n",
+					"dim_geo = raw_data[['geoId','countriesAndTerritories','countryterritoryCode','continentExp']].distinct()\r\n",
+					"dim_geo.write.parquet(conformedfolderpath + '/dim/geo', mode='overwrite')"
+				],
+				"execution_count": null
+			}
+		]
+	}
+}

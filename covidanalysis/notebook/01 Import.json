@@ -1,0 +1,66 @@
+{
+	"name": "01 Import",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "ondemandspark",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2
+		},
+		"metadata": {
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/d661a889-c8b8-41f2-93ab-99b3ed99b6e7/resourceGroups/CovidDemo/providers/Microsoft.Synapse/workspaces/covidanalysis/bigDataPools/ondemandspark",
+				"name": "ondemandspark",
+				"type": "Spark",
+				"endpoint": "https://covidanalysis.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/ondemandspark",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "2.4",
+				"nodeCount": 3,
+				"cores": 8,
+				"memory": 56
+			}
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd\n",
+					"\n",
+					"#variables\n",
+					"coviddataurl = \"https://opendata.ecdc.europa.eu/covid19/casedistribution/csv\"\n",
+					"adlspath = 'abfss://covidanalysisfilesystem@covidanalysisstorage.dfs.core.windows.net/covid/'\n",
+					"rawfolderpathspark = adlspath + 'spark/bronze'\n",
+					"rawfolderpathsql = adlspath + 'sql/bronze'\n",
+					"rawfolderpathpipeline = adlspath + 'pipelines/bronze'\n",
+					"\n",
+					"#read data from source\n",
+					"Casesdf = pd.read_csv(coviddataurl, encoding='ISO-8859-1')\n",
+					"\n",
+					"raw_data = spark.createDataFrame(Casesdf.astype(str))\n",
+					"\n",
+					"raw_data.write.partitionBy('Year','Month','Day').csv(rawfolderpathspark, mode='overwrite', header = 'true')\n",
+					"raw_data.write.csv(rawfolderpathsql, mode='overwrite', header = 'true')\n",
+					"raw_data.write.csv(rawfolderpathpipeline, mode='overwrite', header = 'true')\n",
+					"\n",
+					"raw_data.head()\n",
+					"\n",
+					""
+				],
+				"execution_count": 3
+			}
+		]
+	}
+}

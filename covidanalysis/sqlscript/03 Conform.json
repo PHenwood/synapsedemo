@@ -1,0 +1,16 @@
+{
+	"name": "03 Conform",
+	"properties": {
+		"content": {
+			"query": "USE [CovidonDemand];\nGO\n\nIF EXISTS (SELECT * FROM sys.external_tables WHERE name = 'DimDate') \nDROP EXTERNAL TABLE [dbo].[DimDate]\nGO\n\nIF EXISTS (SELECT * FROM sys.external_tables WHERE name = 'DimGeo') \nDROP EXTERNAL TABLE [dbo].[DimGeo]\nGO\n\nIF EXISTS (SELECT * FROM sys.external_tables WHERE name = 'FactCovid') \nDROP EXTERNAL TABLE [dbo].[FactCovid]\nGO\n\nIF EXISTS (SELECT * FROM sys.external_tables WHERE name = 'FactPopulation') \nDROP EXTERNAL TABLE [dbo].[FactPopulation]\nGO\n\n\nCREATE EXTERNAL TABLE [dbo].[DimDate] WITH (\n        LOCATION = 'Gold/Dim/Date/',\n        DATA_SOURCE = [CovidData],\n        FILE_FORMAT = [ParquetFF]\n) \n\nAS\n\nSELECT\n    DISTINCT\n    [daterep], [day], [month], [year]\nFROM\n    [dbo].[CovidDataParquet]\n\nGo\n\nCREATE EXTERNAL TABLE [dbo].[DimGeo] WITH (\n        LOCATION = 'Gold/Dim/Geo/',\n        DATA_SOURCE = [CovidData],\n        FILE_FORMAT = [ParquetFF]\n) \n\nAS\n\nSELECT \n    DISTINCT\n    [geoid],[countriesandterritories],[countryterritorycode],[continentexp]\nFROM\n    [dbo].[CovidDataParquet]\n\nGo\n\nCREATE EXTERNAL TABLE [dbo].[FactPopulation] WITH (\n        LOCATION = 'Gold/Fact/Population/',\n        DATA_SOURCE = [CovidData],\n        FILE_FORMAT = [ParquetFF]\n) \n\nAS\n\nSELECT \n    DISTINCT\n    [geoid],[popdata2018]\nFROM\n    [dbo].[CovidDataParquet]\n\nGo\n\nCREATE EXTERNAL TABLE [dbo].[FactCovid] WITH (\n        LOCATION = 'Gold/Fact/Covid/',\n        DATA_SOURCE = [CovidData],\n        FILE_FORMAT = [ParquetFF]\n) \n\nAS\n\nSELECT \n    DISTINCT\n    [daterep],[geoid], [cases], [deaths]\nFROM\n    [dbo].[CovidDataParquet]\n\nGo",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"name": "CovidOnDemand",
+				"type": "SqlOnDemand"
+			}
+		},
+		"type": "SqlQuery"
+	}
+}

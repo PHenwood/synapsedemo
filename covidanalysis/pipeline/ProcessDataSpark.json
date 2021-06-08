@@ -1,0 +1,56 @@
+{
+	"name": "ProcessDataSpark",
+	"properties": {
+		"activities": [
+			{
+				"name": "Transform",
+				"type": "SynapseNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "02 Transform",
+						"type": "NotebookReference"
+					}
+				}
+			},
+			{
+				"name": "Conform",
+				"type": "SynapseNotebook",
+				"dependsOn": [
+					{
+						"activity": "Transform",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "03 Conform",
+						"type": "NotebookReference"
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"annotations": [],
+		"lastPublishTime": "2020-06-10T15:18:48Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

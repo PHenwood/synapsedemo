@@ -1,0 +1,62 @@
+{
+	"name": "TransformToConform",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "TransformDataset",
+						"type": "DatasetReference"
+					},
+					"name": "CovidData"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ConformedFactCovid",
+						"type": "DatasetReference"
+					},
+					"name": "FactCovid"
+				},
+				{
+					"dataset": {
+						"referenceName": "ConformedFactPopulation",
+						"type": "DatasetReference"
+					},
+					"name": "FactPopulation"
+				},
+				{
+					"dataset": {
+						"referenceName": "ConformedDimDate",
+						"type": "DatasetReference"
+					},
+					"name": "DimDate"
+				},
+				{
+					"dataset": {
+						"referenceName": "ConformedDimGeography",
+						"type": "DatasetReference"
+					},
+					"name": "DimGeography"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FilterFactCovid"
+				},
+				{
+					"name": "FilterDimGeography"
+				},
+				{
+					"name": "FilterDimDate"
+				},
+				{
+					"name": "FilterFactPopulation"
+				}
+			],
+			"script": "source(output(\n\t\tdateRep as string,\n\t\tday as string,\n\t\tmonth as string,\n\t\tyear as string,\n\t\tcases as string,\n\t\tdeaths as string,\n\t\tcountriesAndTerritories as string,\n\t\tgeoId as string,\n\t\tcountryterritoryCode as string,\n\t\tpopData2019 as string,\n\t\tcontinentExp as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tformat: 'parquet') ~> CovidData\nCovidData select(mapColumn(\n\t\tdateRep,\n\t\tcases,\n\t\tdeaths,\n\t\tgeoId\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> FilterFactCovid\nCovidData select(mapColumn(\n\t\tcountriesAndTerritories,\n\t\tgeoId,\n\t\tcountryterritoryCode,\n\t\tcontinentExp\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> FilterDimGeography\nCovidData select(mapColumn(\n\t\tdateRep,\n\t\tday,\n\t\tmonth,\n\t\tyear\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> FilterDimDate\nCovidData select(mapColumn(\n\t\tgeoId,\n\t\tpopData2019\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> FilterFactPopulation\nFilterFactCovid sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> FactCovid\nFilterFactPopulation sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> FactPopulation\nFilterDimDate sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DimDate\nFilterDimGeography sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tformat: 'parquet',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DimGeography"
+		}
+	}
+}

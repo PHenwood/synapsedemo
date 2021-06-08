@@ -1,0 +1,60 @@
+{
+	"name": "01 Import",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd\r\n",
+					"\r\n",
+					"#variables\r\n",
+					"coviddataurl = \"https://opendata.ecdc.europa.eu/covid19/casedistribution/csv\"\r\n",
+					"adlspath = 'abfss://phsynapsefs@phsynapsedls.dfs.core.windows.net/Covid/'\r\n",
+					"rawfolderpathspark = adlspath + 'spark/bronze'\r\n",
+					"rawfolderpathsql = adlspath + 'sql/bronze'\r\n",
+					"rawfolderpathpipeline = adlspath + 'pipelines/bronze'\r\n",
+					"\r\n",
+					"#read data from source\r\n",
+					"Casesdf = pd.read_csv(coviddataurl, encoding='ISO-8859-1')\r\n",
+					"\r\n",
+					"raw_data = spark.createDataFrame(Casesdf.astype(str))\r\n",
+					"\r\n",
+					"raw_data.write.partitionBy('Year','Month','Day').csv(rawfolderpathspark, mode='overwrite', header = 'true')\r\n",
+					"raw_data.write.csv(rawfolderpathsql, mode='overwrite', header = 'true')\r\n",
+					"raw_data.write.csv(rawfolderpathpipeline, mode='overwrite', header = 'true')\r\n",
+					"\r\n",
+					"raw_data.head()"
+				],
+				"execution_count": null
+			}
+		]
+	}
+}

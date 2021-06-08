@@ -1,0 +1,11 @@
+{
+	"name": "Covid Impact Analysis",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "PowerBIWorkspace",
+		"typeProperties": {
+			"workspaceID": "906825c1-8582-4683-b023-a13c7da5d2f6"
+		}
+	}
+}

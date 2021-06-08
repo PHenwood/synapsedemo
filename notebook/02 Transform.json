@@ -1,0 +1,51 @@
+{
+	"name": "02 Transform",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"#variables\r\n",
+					"adlspath = 'abfss://phsynapsefs@phsynapsedls.dfs.core.windows.net/Covid/spark/'\r\n",
+					"rawfolderpath = adlspath + 'bronze'\r\n",
+					"transformfolderpath = adlspath + 'silver'\r\n",
+					"\r\n",
+					"raw_data = spark.read.load(rawfolderpath, format='csv', header=True)\r\n",
+					"\r\n",
+					"raw_data.write.partitionBy('Year','Month','Day').parquet(transformfolderpath,mode='overwrite')\r\n",
+					"\r\n",
+					"raw_data.head()"
+				],
+				"execution_count": null
+			}
+		]
+	}
+}
